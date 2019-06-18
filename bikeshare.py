@@ -72,7 +72,7 @@ def filter_data_asper_time_period(raw_city_data):
             if get_month.lower() in month_tuple:
                 #filter the data accourding to the get_month
                 month_ind = month_tuple.index(get_month.lower()) + 1
-                filtered_city_data = raw_city_data[raw_city_data['Start_Time'].dt.month==month_ind]
+                filter_city_data = raw_city_data[raw_city_data['Start_Time'].dt.month==month_ind]
                 time_period = get_month.lower()
                 break
             print('Enter a valid month name provided in the options')
@@ -84,26 +84,26 @@ def filter_data_asper_time_period(raw_city_data):
             get_day = int(input('\nWhich day? Please type your response as an integer. E.g. Monday:0, Tuesday:1...\n'))
             if get_day in np.arange(0,6,1,'int'):
                 #filter the data accourding to the get_day
-                filtered_city_data = raw_city_data[raw_city_data['Start_Time'].dt.dayofweek==get_day]
+                filter_city_data = raw_city_data[raw_city_data['Start_Time'].dt.dayofweek==get_day]
                 time_period=list_weekdays[get_day]
                 break
             print('Enter a valid day for the month:')
 
     else:
-        filtered_city_data = raw_city_data # for none option
+        filter_city_data = raw_city_data # for none option
 
-    return filtered_city_data, time_period
+    return filter_city_data, time_period
 
 
-def popular_month(city_file,time_period,filtered_city_data):
-    '''Takes the city name, filter name, and filtered city data as input and process
+def popular_month(city_file,time_period,filter_city_data):
+    '''Takes the city name, filter name, and filter city data as input and process
             to find the pouplar month for start time and compare it with the least popular month.
-            Finally, print the results.
+            
     Question: What is the most popular month for start time?
     Args:
         (str) Name of the city.
         (str) Name of the filter.
-        (obj) filtered data.
+        (obj) filter data.
     Returns:
         none.
         '''
@@ -116,15 +116,15 @@ def popular_month(city_file,time_period,filtered_city_data):
     print("The most popular month for start time is {} with {} total transactions.".format(month_tuple[grouped_data.argmax()-1], grouped_data[grouped_data.argmax()]))
     print("It's total number of transactions is {} times greater than the total transactions for the least popular month {}.".format(format(grouped_data[grouped_data.argmax()]/grouped_data[grouped_data.argmin()],'.2f'),month_tuple[grouped_data.argmin()-1]))
 
-def popular_day(city_file,time_period,filtered_city_data):
-    '''Takes the city name, filter name, and filtered city data as input and process
+def popular_day(city_file,time_period,filter_city_data):
+    '''Takes the city name, filter name, and filter city data as input and process
             to find the pouplar day for start time and compare it with the least popular day.
-            Finally, print the results.
+            
     Question: What is the most popular day of week (Monday, Tuesday, etc.) for start time?
     Args:
         (str) Name of the city.
         (str) Name of the filter.
-        (obj) filtered data.
+        (obj) filter data.
     Returns:
         none.
     '''
@@ -133,7 +133,7 @@ def popular_day(city_file,time_period,filtered_city_data):
     list_weekdays = ('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday')
     #convert the datetime frame to week system
 
-    tmp_data1 = filtered_city_data.loc[:,['Start_Time','End_Time']]
+    tmp_data1 = filter_city_data.loc[:,['Start_Time','End_Time']]
     tmp_data1['weekday'] = tmp_data1['Start_Time'].dt.dayofweek
     tmp_data2 = tmp_data1.groupby(['weekday']).size().reset_index(name='counts')
     final_poplr_day_stat = tmp_data2.loc[tmp_data2['counts'].idxmax()]
@@ -142,57 +142,57 @@ def popular_day(city_file,time_period,filtered_city_data):
     print("The most popular day of the week is {} with total transactions of {}.".format(list_weekdays[final_poplr_day_stat['weekday']], final_poplr_day_stat['counts']))
     print("{} has {} times more transaction than {} which is the least popular day.".format(list_weekdays[final_poplr_day_stat['weekday']], format(final_poplr_day_stat['counts']/lst_poplr_day_stat['counts'],'.2f'), list_weekdays[lst_poplr_day_stat['weekday']]))
 
-def popular_hour(city_file, time_period,filtered_city_data):
-    '''Takes the city name, filter name, and filtered city data as input and process
+def popular_hour(city_file, time_period,filter_city_data):
+    '''Takes the city name, filter name, and filter city data as input and process
             to find the popular hour of the day for start time and compare it with the least popular hour.
-            Finally, print the results.
+            
     Question: What is the most popular hour of day for start time?
     Args:
         (str) Name of the city.
         (str) Name of the filter.
-        (obj) filtered data.
+        (obj) filter data.
     Returns:
         none.
     '''
     # TODO: complete function
-    grouped_data = filtered_city_data['Start_Time'].groupby([filtered_city_data.Start_Time.dt.hour]).agg('count')
+    grouped_data = filter_city_data['Start_Time'].groupby([filter_city_data.Start_Time.dt.hour]).agg('count')
     print('STATISTICS FOR "{}" CITY AND "{}" FILTER'.format(city_file.upper(),time_period.upper()))
     print("The most popular hour of the day for start time is {}:00 with {} total transactions.".format(grouped_data.argmax(), grouped_data[grouped_data.argmax()]))
     print("It's total transactions are {} times greater than the total transactions of {}:00 which is the least popular hour.".format(format(grouped_data[grouped_data.argmax()]/grouped_data[grouped_data.argmin()],'.2f'),grouped_data.argmin()))
 
-def trip_duration(city_file, time_period,filtered_city_data):
-    '''Takes the city name, filter name, and filtered city data as input and process
+def trip_duration(city_file, time_period,filter_city_data):
+    '''Takes the city name, filter name, and filter city data as input and process
             to find the total trip duration and average trip duration.
-            Finally, print the results.
+            
     Question: What is the total trip duration and average trip duration?
     Args:
         (str) Name of the city.
         (str) Name of the filter.
-        (obj) filtered data.
+        (obj) filter data.
     Returns:
         none.
     '''
     # TODO: complete function
     print('STATISTICS FOR "{}" CITY AND "{}" FILTER'.format(city_file.upper(),time_period.upper()))
-    print("The total trip duration and average trip duration are {} seconds and {} seconds".format(format(filtered_city_data['Trip_Duration'].max(),'.2f'), format(filtered_city_data['Trip_Duration'].mean(),'.2f')))
+    print("The total trip duration and average trip duration are {} seconds and {} seconds".format(format(filter_city_data['Trip_Duration'].max(),'.2f'), format(filtered_city_data['Trip_Duration'].mean(),'.2f')))
 
-def popular_stations(city_file, time_period,filtered_city_data):
+def popular_stations(city_file, time_period,filter_city_data):
     '''Takes the city name, filter name, and filtered city data as input and process
             to find the most popular start station and most popular end station
-            and compare it with the least popular stations. Finally, print the results.
+            and compare it with the least popular stations. 
     Question: What is the most popular start station and most popular end station?
     Args:
         (str) Name of the city.
         (str) Name of the filter.
-        (obj) filtered data.
+        (obj) filter data.
     Returns:
         none.
     '''
     # TODO: complete function
-    grp_pplr_start_stn = filtered_city_data.groupby(['Start_Station']).size().reset_index(name='counts')
+    grp_pplr_start_stn = filter_city_data.groupby(['Start_Station']).size().reset_index(name='counts')
     pplr_start_stn=grp_pplr_start_stn.loc[grp_pplr_start_stn['counts'].idxmax()]
     lst_pplr_start_stn=grp_pplr_start_stn.loc[grp_pplr_start_stn['counts'].idxmin()]
-    grp_pplr_end_stn = filtered_city_data.groupby(['End_Station']).size().reset_index(name='counts')
+    grp_pplr_end_stn = filter_city_data.groupby(['End_Station']).size().reset_index(name='counts')
     pplr_end_stn=grp_pplr_end_stn.loc[grp_pplr_end_stn['counts'].idxmax()]
     lst_pplr_end_stn=grp_pplr_end_stn.loc[grp_pplr_end_stn['counts'].idxmin()]
     print('STATISTICS FOR "{}" CITY AND "{}" FILTER'.format(city_file.upper(),time_period.upper()))
@@ -201,10 +201,10 @@ def popular_stations(city_file, time_period,filtered_city_data):
     print("The most popular end station is '{}' with {} total transactions.".format(pplr_end_stn['End_Station'], pplr_end_stn['counts']))
     print("'{}' has {} times more transactions than the '{}' which is least popular end station.".format(pplr_end_stn['End_Station'], format(pplr_end_stn['counts']/lst_pplr_end_stn['counts'],'.2f'), lst_pplr_end_stn['End_Station']))
 
-def popular_trip(city_file, time_period,filtered_city_data):
-    '''Takes the city name, filter name, and filtered city data as input and process
+def popular_trip(city_file, time_period,filter_city_data):
+    '''Takes the city name, filter name, and filter city data as input and process
             to find the most popular trip and compare it with the least popular trip.
-            Finally, print the results.
+            
     Question: What is the most popular trip?
     Args:
         (str) Name of the city.
@@ -214,16 +214,17 @@ def popular_trip(city_file, time_period,filtered_city_data):
         none.
     '''
     # TODO: complete function
-    grp_pplr_trip = filtered_city_data.groupby(['Start_Station', 'End_Station']).size().reset_index(name='counts')
+    grp_pplr_trip = filter_city_data.groupby(['Start_Station', 'End_Station']).size().reset_index(name='counts')
     pplr_trip=grp_pplr_trip.loc[grp_pplr_trip['counts'].idxmax()]
     print('STATISTICS FOR "{}" CITY AND "{}" FILTER'.format(city_file.upper(),time_period.upper()))
     print("The most popular trip starts from station '{}' and ends at '{}' with {} total transactions.".format(pplr_trip['Start_Station'], pplr_trip['End_Station'], pplr_trip['counts']))
 
 
 
-def users(city_file, time_period, filtered_city_data):
+def users(city_file, time_period, filter_city_data):
     '''Takes the city name, filter name, and filtered city data as input and process
-            to find the count of all the user types. Finally, print the results.
+            to find the count of all the user types. 
+	    
     Question: What are the counts of each user type?
     Args:
         (str) Name of the city.
@@ -233,16 +234,17 @@ def users(city_file, time_period, filtered_city_data):
         none.
     '''
     # TODO: complete function
-    grp_user_type = filtered_city_data.groupby(['User_Type']).size().reset_index(name='counts')
+    grp_user_type = filter_city_data.groupby(['User_Type']).size().reset_index(name='counts')
     print('STATISTICS FOR "{}" CITY AND "{}" FILTER'.format(city_file.upper(),time_period.upper()))
     print("The total counts of each user type are as follows:")
     print(grp_user_type)
 
 
 
-def gender(city_file, time_period,filtered_city_data):
+def gender(city_file, time_period,filter_city_data):
     '''Takes the city name, filter name, and filtered city data as input and process
-            to find the count of all the gender types. Finally, print the results.
+            to find the count of all the gender types. 
+    
     Question: What are the counts of gender?
     Args:
         (str) Name of the city.
@@ -255,15 +257,16 @@ def gender(city_file, time_period,filtered_city_data):
     if city_file.lower() == 'washington':
         print('Sorry! Data related to gender is not present for Washingtion.')
     else:
-        grp_gender = filtered_city_data.groupby(['Gender']).size().reset_index(name='counts')
+        grp_gender = filter_city_data.groupby(['Gender']).size().reset_index(name='counts')
         print('STATISTICS FOR "{}" CITY AND "{}" FILTER'.format(city_file.upper(),time_period.upper()))
         print("The total counts of each gender type are as follows:")
         print(grp_gender)
 
-def birth_years(city_file, time_period,filtered_city_data):
+def birth_years(city_file, time_period,filter_city_data):
     '''Takes the city name, filter name, and filtered city data as input and process
             to find the earliest (i.e. oldest user), most recent (i.e. youngest user),
-            and most popular birth years. Finally, print the results.
+            and most popular birth years. 
+	    
     Question: What are the earliest (i.e. oldest user), most recent (i.e. youngest user),
     and most popular birth years?
     Args:
@@ -277,12 +280,12 @@ def birth_years(city_file, time_period,filtered_city_data):
     if city_file.lower() == 'washington':
         print('Sorry! Data related to birth year is not present for Washingtion.')
     else:
-        grp_birth_year = filtered_city_data.groupby(['Birth_Year']).size().reset_index(name='counts')
+        grp_birth_year = filter_city_data.groupby(['Birth_Year']).size().reset_index(name='counts')
         print('STATISTICS FOR "{}" CITY AND "{}" FILTER'.format(city_file.upper(),time_period.upper()))
         print("The the earliest (i.e. oldest user) and the most recent (i.e. youngest user) birth years are {} and {}, respectively".format(int(grp_birth_year['Birth_Year'].min()), int(grp_birth_year['Birth_Year'].max())))
         print("The most popular birth year is {} with total {} counts.".format(int(grp_birth_year.loc[grp_birth_year['counts'].idxmax()]['Birth_Year']),int(grp_birth_year.loc[grp_birth_year['counts'].idxmax()]['counts'])))
 
-def display_data(city_file,time_period, filtered_city_data):
+def display_data(city_file,time_period, filter_city_data):
     '''Displays five lines of data if the user specifies that they would like to.
     After displaying five lines, ask the user if they would like to see five more,
     continuing asking until they say stop.
@@ -302,7 +305,7 @@ def display_data(city_file,time_period, filtered_city_data):
         if display.lower() in ('yes', 'no'):
             if display.lower() == 'yes':
                 print("This individual trip data is filtered by '{}' and belongs to {} city.".format(time_period, city_file))
-                print(filtered_city_data[count:count+5])
+                print(filter_city_data[count:count+5])
                 count +=5
             else:
                 print('Display of the data ends!')
@@ -321,10 +324,10 @@ def statistics():
     # Filter by city (Chicago, New York, Washington)
     raw_data, city_name = get_rawdata_asper_city()
 
-    # CLean the data for empty values
+    # Clean the data for empty values
 
     # Filter by time period (month, day, none)
-    filtered_data, filter_method = filter_data_asper_time_period(raw_data)
+    filter_data, filter_method = filter_data_asper_time_period(raw_data)
 
     print('Calculating the first statistic...')
 
