@@ -393,19 +393,4 @@ def statistics():
     birth_years(city_name,filter_method,filtered_data)
     print("That took %s seconds.\n" % (time.time() - start_time))
 
-    # Display five lines of data at a time if user specifies that they would like to
-    display_data(city_name,filter_method,filtered_data)
-    # Restart?
-    while True:
-        restart = input('\nWould you like to restart? Type \'yes\' or \'no\'.\n')
-        if restart.lower() in ('yes', 'no'):
-            if restart.lower() == 'yes':
-                statistics()
-            else:
-                print('Thanks for using this application. Hope you enjoyed the interactive session.')
-            break
-        print('Enter a valid input provided in the options')
-
-
-if __name__ == "__main__":
-	statistics()
+   
